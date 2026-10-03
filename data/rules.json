@@ -1,0 +1,394 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "created": "2026-10-03",
+    "primary_source": "WHO IMCI Chart Booklet (Integrated Management of Childhood Illness), 2014 revision",
+    "secondary_source": "Kenya IMCI National Guidelines, Ministry of Health, 2016",
+    "scope": "Children aged 2 months to 59 months (2 months to <5 years)",
+    "note": "Rules encoded from chart booklet by hand. Each rule ID matches the predicate in rules_engine.dart. Verify every page reference against the physical PDF before a clinical deployment."
+  },
+  "rules": [
+    {
+      "id": "GDS_CONVULSIONS_NOW",
+      "tier": "urgent_referral",
+      "priority": 199,
+      "classification": "GENERAL DANGER SIGN",
+      "findings": ["Convulsions currently occurring"],
+      "action": "Refer URGENTLY to hospital",
+      "source": {
+        "label": "IMCI Chart 1 – General Danger Signs",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 3
+      },
+      "passage": "A child has a general danger sign if the child: is having convulsions now. Refer URGENTLY to hospital."
+    },
+    {
+      "id": "GDS_LETHARGY",
+      "tier": "urgent_referral",
+      "priority": 198,
+      "classification": "GENERAL DANGER SIGN",
+      "findings": ["Lethargic or unconscious"],
+      "action": "Refer URGENTLY to hospital",
+      "source": {
+        "label": "IMCI Chart 1 – General Danger Signs",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 3
+      },
+      "passage": "A child has a general danger sign if the child: is lethargic or unconscious. Refer URGENTLY to hospital."
+    },
+    {
+      "id": "GDS_UNABLE_TO_FEED",
+      "tier": "urgent_referral",
+      "priority": 197,
+      "classification": "GENERAL DANGER SIGN",
+      "findings": ["Unable to drink or breastfeed"],
+      "action": "Refer URGENTLY to hospital",
+      "source": {
+        "label": "IMCI Chart 1 – General Danger Signs",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 3
+      },
+      "passage": "A child has a general danger sign if the child: is not able to drink or breastfeed. Refer URGENTLY to hospital."
+    },
+    {
+      "id": "GDS_VOMITS_ALL",
+      "tier": "urgent_referral",
+      "priority": 196,
+      "classification": "GENERAL DANGER SIGN",
+      "findings": ["Vomits everything"],
+      "action": "Refer URGENTLY to hospital",
+      "source": {
+        "label": "IMCI Chart 1 – General Danger Signs",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 3
+      },
+      "passage": "A child has a general danger sign if the child: vomits everything. Refer URGENTLY to hospital."
+    },
+    {
+      "id": "RESP_CYANOSIS",
+      "tier": "urgent_referral",
+      "priority": 190,
+      "classification": "SEVERE PNEUMONIA OR VERY SEVERE DISEASE",
+      "findings": ["Central cyanosis"],
+      "action": "Refer URGENTLY. Give first dose of antibiotic.",
+      "source": {
+        "label": "IMCI Chart 2 – Cough or Difficult Breathing",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 5
+      },
+      "passage": "Classify as SEVERE PNEUMONIA OR VERY SEVERE DISEASE if: central cyanosis. Refer URGENTLY to hospital."
+    },
+    {
+      "id": "RESP_CHEST_INDRAWING",
+      "tier": "urgent_referral",
+      "priority": 189,
+      "classification": "SEVERE PNEUMONIA OR VERY SEVERE DISEASE",
+      "findings": ["Chest indrawing"],
+      "action": "Refer URGENTLY. Give first dose of amoxicillin.",
+      "source": {
+        "label": "IMCI Chart 2 – Cough or Difficult Breathing",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 5
+      },
+      "passage": "Classify as SEVERE PNEUMONIA OR VERY SEVERE DISEASE if: chest indrawing. Refer URGENTLY to hospital. Give first dose of appropriate antibiotic."
+    },
+    {
+      "id": "RESP_STRIDOR",
+      "tier": "urgent_referral",
+      "priority": 188,
+      "classification": "SEVERE PNEUMONIA OR VERY SEVERE DISEASE",
+      "findings": ["Stridor in a calm child"],
+      "action": "Refer URGENTLY to hospital.",
+      "source": {
+        "label": "IMCI Chart 2 – Cough or Difficult Breathing",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 5
+      },
+      "passage": "Classify as SEVERE PNEUMONIA OR VERY SEVERE DISEASE if: stridor in calm child. Refer URGENTLY to hospital."
+    },
+    {
+      "id": "DIARR_SEVERE_DEHYDRATION",
+      "tier": "urgent_referral",
+      "priority": 180,
+      "classification": "SEVERE DEHYDRATION",
+      "findings": ["Two or more signs of severe dehydration"],
+      "action": "Refer URGENTLY with ongoing ORS. Give ORS on the way.",
+      "source": {
+        "label": "IMCI Chart 3 – Diarrhoea",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 7
+      },
+      "passage": "Classify as SEVERE DEHYDRATION if two of the following: lethargic or unconscious; sunken eyes; not able to drink or drinks poorly; skin pinch goes back very slowly (>2 s). Refer URGENTLY to hospital with ORS."
+    },
+    {
+      "id": "FEVER_STIFF_NECK",
+      "tier": "urgent_referral",
+      "priority": 175,
+      "classification": "VERY SEVERE FEBRILE DISEASE",
+      "findings": ["Stiff neck (meningism)"],
+      "action": "Refer URGENTLY. Give first dose of antibiotic and antipyretic.",
+      "source": {
+        "label": "IMCI Chart 4 – Fever",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 9
+      },
+      "passage": "Classify as VERY SEVERE FEBRILE DISEASE if: stiff neck. Refer URGENTLY. Give first dose of antibiotic and antipyretic."
+    },
+    {
+      "id": "FEVER_BULGING_FONTANELLE",
+      "tier": "urgent_referral",
+      "priority": 174,
+      "classification": "VERY SEVERE FEBRILE DISEASE",
+      "findings": ["Bulging fontanelle"],
+      "action": "Refer URGENTLY.",
+      "source": {
+        "label": "IMCI Chart 4 – Fever",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 9
+      },
+      "passage": "Classify as VERY SEVERE FEBRILE DISEASE if: bulging fontanelle (in infant). Refer URGENTLY."
+    },
+    {
+      "id": "EAR_MASTOIDITIS",
+      "tier": "urgent_referral",
+      "priority": 160,
+      "classification": "MASTOIDITIS",
+      "findings": ["Tender swelling behind the ear"],
+      "action": "Refer URGENTLY to hospital.",
+      "source": {
+        "label": "IMCI Chart 5 – Ear Problem",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 12
+      },
+      "passage": "Classify as MASTOIDITIS if: tender swelling behind the ear. Refer URGENTLY to hospital."
+    },
+    {
+      "id": "NUTR_SEVERE_WASTING",
+      "tier": "urgent_referral",
+      "priority": 155,
+      "classification": "SEVERE ACUTE MALNUTRITION",
+      "findings": ["Visible severe wasting"],
+      "action": "Refer URGENTLY for inpatient nutrition management.",
+      "source": {
+        "label": "IMCI Chart 6 – Nutritional Status",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 13
+      },
+      "passage": "Classify as SEVERE ACUTE MALNUTRITION if: visible severe wasting. Refer URGENTLY for inpatient nutrition management."
+    },
+    {
+      "id": "NUTR_BILATERAL_OEDEMA",
+      "tier": "urgent_referral",
+      "priority": 154,
+      "classification": "SEVERE ACUTE MALNUTRITION",
+      "findings": ["Bilateral pitting oedema of both feet (kwashiorkor)"],
+      "action": "Refer URGENTLY.",
+      "source": {
+        "label": "IMCI Chart 6 – Nutritional Status",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 13
+      },
+      "passage": "Classify as SEVERE ACUTE MALNUTRITION if: oedema of both feet. Refer URGENTLY."
+    },
+    {
+      "id": "NUTR_MUAC_RED",
+      "tier": "urgent_referral",
+      "priority": 153,
+      "classification": "SEVERE ACUTE MALNUTRITION",
+      "findings": ["MUAC < 115 mm (red zone)"],
+      "action": "Refer URGENTLY for therapeutic feeding.",
+      "source": {
+        "label": "IMCI Chart 6 – Nutritional Status",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 13
+      },
+      "passage": "Classify as SEVERE ACUTE MALNUTRITION if: MUAC < 115 mm. Refer URGENTLY for therapeutic feeding."
+    },
+    {
+      "id": "ANAEMIA_SEVERE",
+      "tier": "urgent_referral",
+      "priority": 150,
+      "classification": "SEVERE ANAEMIA",
+      "findings": ["Severe palmar pallor"],
+      "action": "Refer URGENTLY. Give Vitamin A.",
+      "source": {
+        "label": "IMCI Chart 6 – Nutritional Status",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 14
+      },
+      "passage": "Classify as SEVERE ANAEMIA if: severe palmar pallor. Refer URGENTLY. Give Vitamin A."
+    },
+    {
+      "id": "RESP_PNEUMONIA",
+      "tier": "home_care",
+      "priority": 90,
+      "classification": "PNEUMONIA",
+      "findings": ["Fast breathing"],
+      "action": "Give oral amoxicillin for 5 days. Follow up in 2 days.",
+      "fast_breathing_thresholds": {
+        "age_2_to_11_months": "≥50 breaths/min",
+        "age_12_to_59_months": "≥40 breaths/min"
+      },
+      "source": {
+        "label": "IMCI Chart 2 – Cough or Difficult Breathing",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 6
+      },
+      "passage": "Classify as PNEUMONIA if: fast breathing (≥50 bpm if age 2–11 months; ≥40 bpm if 12–59 months) and no chest indrawing or stridor. Give oral amoxicillin for 5 days. Follow up in 2 days."
+    },
+    {
+      "id": "DIARR_DYSENTERY",
+      "tier": "home_care",
+      "priority": 72,
+      "classification": "DYSENTERY",
+      "findings": ["Blood in stool"],
+      "action": "Give ciprofloxacin for 3 days. Follow up in 2 days.",
+      "source": {
+        "label": "IMCI Chart 3 – Diarrhoea",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 8
+      },
+      "passage": "Classify as DYSENTERY if: blood in the stool. Give ciprofloxacin for 3 days. Follow up in 2 days."
+    },
+    {
+      "id": "DIARR_PERSISTENT",
+      "tier": "home_care",
+      "priority": 71,
+      "classification": "PERSISTENT DIARRHOEA",
+      "findings": ["Diarrhoea ≥ 14 days"],
+      "action": "Refer for assessment. Advise the mother on feeding.",
+      "source": {
+        "label": "IMCI Chart 3 – Diarrhoea",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 8
+      },
+      "passage": "Classify as PERSISTENT DIARRHOEA if: diarrhoea for 14 days or more. Refer for assessment. Advise the mother on feeding."
+    },
+    {
+      "id": "DIARR_SOME_DEHYDRATION",
+      "tier": "home_care",
+      "priority": 80,
+      "classification": "SOME DEHYDRATION",
+      "findings": ["Two or more signs of some dehydration"],
+      "action": "Give ORS solution (Plan B). Follow up in 2 days.",
+      "source": {
+        "label": "IMCI Chart 3 – Diarrhoea",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 8
+      },
+      "passage": "Classify as SOME DEHYDRATION if two of the following: restless or irritable; sunken eyes; drinks eagerly/thirsty; skin pinch goes back slowly (1–2 s). Give ORS solution (Plan B). Follow up in 2 days."
+    },
+    {
+      "id": "FEVER_MALARIA_POSITIVE",
+      "tier": "home_care",
+      "priority": 75,
+      "classification": "MALARIA",
+      "findings": ["Fever with positive malaria RDT"],
+      "action": "Give artemether-lumefantrine (AL) per weight band for 3 days. Give antipyretic. Follow up in 2 days.",
+      "source": {
+        "label": "IMCI Chart 4 – Fever (Malaria)",
+        "document": "Kenya IMCI National Guidelines 2016",
+        "page": 22
+      },
+      "passage": "Classify as MALARIA if: fever and positive malaria RDT (in malaria-risk area). Give artemether-lumefantrine (AL) for 3 days per weight band. Give antipyretic. Follow up in 2 days if not improving."
+    },
+    {
+      "id": "EAR_ACUTE_INFECTION",
+      "tier": "home_care",
+      "priority": 65,
+      "classification": "ACUTE EAR INFECTION",
+      "findings": ["Pus draining from ear < 14 days OR ear pain"],
+      "action": "Give amoxicillin for 5 days. Dry ear by wicking. Follow up in 5 days.",
+      "source": {
+        "label": "IMCI Chart 5 – Ear Problem",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 12
+      },
+      "passage": "Classify as ACUTE EAR INFECTION if: pus draining < 14 days OR ear pain. Give amoxicillin for 5 days. Dry the ear by wicking. Follow up in 5 days."
+    },
+    {
+      "id": "NUTR_MUAC_YELLOW",
+      "tier": "home_care",
+      "priority": 60,
+      "classification": "MODERATE ACUTE MALNUTRITION",
+      "findings": ["MUAC 115–125 mm (yellow zone)"],
+      "action": "Provide supplementary food (RUSF). Counsel on feeding. Follow up in 30 days.",
+      "source": {
+        "label": "IMCI Chart 6 – Nutritional Status",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 13
+      },
+      "passage": "Classify as MODERATE ACUTE MALNUTRITION if: MUAC 115 mm to <125 mm. Provide supplementary food (RUSF). Counsel on feeding. Follow up in 30 days."
+    },
+    {
+      "id": "ANAEMIA_SOME",
+      "tier": "home_care",
+      "priority": 55,
+      "classification": "ANAEMIA",
+      "findings": ["Some palmar pallor"],
+      "action": "Give iron and folic acid. Give anthelmintic if age ≥12 months. Follow up in 14 days.",
+      "source": {
+        "label": "IMCI Chart 6 – Nutritional Status",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 14
+      },
+      "passage": "Classify as ANAEMIA if: some palmar pallor. Give iron and folic acid. Give anthelmintic if age ≥12 months. Advise to return if condition worsens. Follow up in 14 days."
+    },
+    {
+      "id": "EAR_CHRONIC",
+      "tier": "home_care",
+      "priority": 52,
+      "classification": "CHRONIC EAR INFECTION",
+      "findings": ["Pus draining ≥ 14 days"],
+      "action": "Dry the ear by wicking. Follow up in 5 days. Refer if no improvement.",
+      "source": {
+        "label": "IMCI Chart 5 – Ear Problem",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 12
+      },
+      "passage": "Classify as CHRONIC EAR INFECTION if: pus draining ≥ 14 days. Dry the ear by wicking. Follow up in 5 days. Refer if no improvement."
+    },
+    {
+      "id": "RESP_NO_PNEUMONIA",
+      "tier": "watchful_waiting",
+      "priority": 30,
+      "classification": "COUGH OR COLD — NO PNEUMONIA",
+      "findings": ["Cough with no fast breathing, no chest indrawing, no stridor"],
+      "action": "Soothe the throat. Return if not improving in 5 days.",
+      "source": {
+        "label": "IMCI Chart 2 – Cough or Difficult Breathing",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 6
+      },
+      "passage": "No signs of pneumonia or very severe disease. Soothe the throat and relieve the cough with a safe remedy. Advise the mother to return if the child is not improving in 5 days."
+    },
+    {
+      "id": "DIARR_NO_DEHYDRATION",
+      "tier": "watchful_waiting",
+      "priority": 25,
+      "classification": "DIARRHOEA — NO DEHYDRATION",
+      "findings": ["Diarrhoea without signs of dehydration"],
+      "action": "Give extra fluid and continue feeding (Plan A). Return if worsens.",
+      "source": {
+        "label": "IMCI Chart 3 – Diarrhoea",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 8
+      },
+      "passage": "No signs of dehydration. Give extra fluid and continue feeding (Plan A). Advise mother to return if the child is not improving in 2 days or develops any danger sign."
+    },
+    {
+      "id": "FEVER_NO_MALARIA",
+      "tier": "watchful_waiting",
+      "priority": 20,
+      "classification": "FEVER — NO MALARIA",
+      "findings": ["Fever with negative malaria RDT"],
+      "action": "Give antipyretic. Return if not improving in 2 days.",
+      "source": {
+        "label": "IMCI Chart 4 – Fever",
+        "document": "WHO IMCI Chart Booklet 2014",
+        "page": 10
+      },
+      "passage": "Classify as FEVER — NO MALARIA if: fever and negative malaria RDT, fever <7 days, and no other severe classification. Give antipyretic. Advise to return if not improving in 2 days."
+    }
+  ]
+}
