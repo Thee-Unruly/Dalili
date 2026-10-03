@@ -1,110 +1,101 @@
-/// Output type of the Dalili triage pipeline.
+/// Output type of the deterministic Dalili triage core.
 ///
-/// [TriageResult] is produced by [TriagePipeline.run] and consumed by the UI.
-/// It is strictly read-only — no method mutates it after construction.
-library dalili.triage.triage_result;
+/// A [TriageResult] describes an **action**, never a diagnosis. The core never
+/// names a disease or classification; when a rule fires it reports the rule's
+/// [TriageResult.ruleId] and the guideline [TriageResult.sourceDoc] /
+/// [TriageResult.sourcePage] that justify the action.
+library;
 
-// ─── Action enum ─────────────────────────────────────────────────────────────
-
-/// The clinical action the CHW must take.
-///
-/// Listed from highest to lowest urgency so comparisons are safe with `>`.
-enum TriageAction {
-  /// Immediate referral to a health facility.  One or more danger signs
-  /// require inpatient or clinician-level care.
+/// The action the triage core recommends.
+enum Outcome {
+  /// Escalate to emergency care immediately.
   urgentReferral,
 
-  /// A specific follow-up question must be answered before a decision can
-  /// be made.  [TriageResult.followUpQuestions] will be non-empty.
-  needsFollowUp,
+  /// Manage at a clinic: treat there, or refer for clinic-level care.
+  referOrTreatAtClinic,
 
-  /// Home care with oral treatment and watchful waiting.
-  /// Return to clinic in the number of days stated in [explanation].
-  homeCareTreatment,
+  /// Manage at home.
+  homeCare,
 
-  /// Input is outside the IMCI 2–59 month scope, or describes an adult /
-  /// newborn.  The CHW should use a different protocol.
+  /// A decision cannot be made yet; more input is required. See
+  /// [TriageResult.missingFields] and [TriageResult.followUpQuestions].
+  needsMoreInfo,
+
+  /// The input falls outside the scope of the loaded guideline.
   outOfScope,
 }
 
-// ─── Citation ─────────────────────────────────────────────────────────────────
-
-/// A single evidence reference from the domain pack or rules table.
-class Citation {
-  /// Short human-readable label (e.g. "IMCI Chart 2 – Cough").
-  final String label;
-
-  /// Guideline document name (e.g. "WHO IMCI Chart Booklet 2014").
-  final String document;
-
-  /// Page number in the source document, for field verification.
-  final int? page;
-
-  /// The verbatim guideline passage retrieved from the domain pack.
-  final String passage;
-
-  const Citation({
-    required this.label,
-    required this.document,
-    required this.passage,
-    this.page,
-  });
-
-  @override
-  String toString() => 'Citation($label, p.$page)';
-}
-
-// ─── TriageResult ─────────────────────────────────────────────────────────────
-
-/// The complete output of one triage run.
+/// Immutable result of one triage evaluation.
 class TriageResult {
-  /// The recommended action.  Always present.
-  final TriageAction action;
+  /// The recommended action.
+  final Outcome outcome;
 
-  /// IDs of the IMCI rules that fired, in match order.
-  /// Sourced from [rules.json].
-  final List<String> firedRuleIds;
+  /// Identifier of the rule that produced this result, if any. `null` for
+  /// [Outcome.needsMoreInfo] and [Outcome.outOfScope].
+  final String? ruleId;
 
-  /// Human-readable labels of the danger signs or classifications found,
-  /// e.g. `["General danger sign: unable to drink", "Fast breathing"]`.
-  final List<String> findings;
+  /// Source document of the matched rule, if any.
+  final String? sourceDoc;
 
-  /// IMCI classification name(s), e.g. `["SEVERE PNEUMONIA"]`.
-  final List<String> classifications;
+  /// Page within [sourceDoc] of the matched rule, if any.
+  final int? sourcePage;
 
-  /// Plain-language explanation phrased for a CHW in the field.
-  /// Produced by [Explainer] (LLM or template fallback).
-  final String explanation;
+  /// Names of the fields that were unknown (`null`) and are required before a
+  /// decision is possible. Non-empty only for [Outcome.needsMoreInfo].
+  final List<String> missingFields;
 
-  /// Guideline passages cited as evidence for this recommendation.
-  final List<Citation> citations;
-
-  /// Non-empty only when [action] == [TriageAction.needsFollowUp].
-  /// Contains the questions [SafetyGate] decided must be answered next.
+  /// One plain-language question per entry in [missingFields].
+  /// Non-empty only for [Outcome.needsMoreInfo].
   final List<String> followUpQuestions;
 
-  /// Wall-clock milliseconds from pipeline start to result ready.
-  final int latencyMs;
+  /// Short, non-clinical explanation of why this outcome was produced.
+  final String reason;
 
   const TriageResult({
-    required this.action,
-    required this.firedRuleIds,
-    required this.findings,
-    required this.classifications,
-    required this.explanation,
-    required this.citations,
-    this.followUpQuestions = const [],
-    this.latencyMs = 0,
+    required this.outcome,
+    this.ruleId,
+    this.sourceDoc,
+    this.sourcePage,
+    this.missingFields = const <String>[],
+    this.followUpQuestions = const <String>[],
+    required this.reason,
   });
 
-  /// Convenience: was a referral triggered?
-  bool get requiresReferral => action == TriageAction.urgentReferral;
+  /// Whether this result is a decision (as opposed to a request for more
+  /// information or an out-of-scope notice).
+  bool get isDecision =>
+      outcome == Outcome.urgentReferral ||
+      outcome == Outcome.referOrTreatAtClinic ||
+      outcome == Outcome.homeCare;
 
-  /// Convenience: is more information needed?
-  bool get needsMoreInfo => action == TriageAction.needsFollowUp;
+  /// Whether this result is a request for more information.
+  bool get needsMoreInfo => outcome == Outcome.needsMoreInfo;
+
+  /// Returns a copy with the supplied fields overwritten. `null` leaves a
+  /// field untouched.
+  TriageResult copyWith({
+    Outcome? outcome,
+    String? ruleId,
+    String? sourceDoc,
+    int? sourcePage,
+    List<String>? missingFields,
+    List<String>? followUpQuestions,
+    String? reason,
+  }) {
+    return TriageResult(
+      outcome: outcome ?? this.outcome,
+      ruleId: ruleId ?? this.ruleId,
+      sourceDoc: sourceDoc ?? this.sourceDoc,
+      sourcePage: sourcePage ?? this.sourcePage,
+      missingFields: missingFields ?? this.missingFields,
+      followUpQuestions: followUpQuestions ?? this.followUpQuestions,
+      reason: reason ?? this.reason,
+    );
+  }
 
   @override
   String toString() =>
-      'TriageResult(action=$action, rules=$firedRuleIds, '
-      'latency=${latencyMs}ms)';
+      'TriageResult(outcome: $outcome, ruleId: $ruleId, '
+      'source: $sourceDoc#$sourcePage, missing: $missingFields, '
+      'questions: ${followUpQuestions.length}, reason: $reason)';
 }

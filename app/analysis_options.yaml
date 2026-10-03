@@ -1,0 +1,9 @@
+# Analysis options for the pure-Dart triage core.
+#
+# The deterministic core lives in lib/triage/ and depends on nothing but the
+# Dart SDK. The lib/engine/ tree (on-device model plumbing) is a separate,
+# Flutter-dependent concern and is excluded so that the core stays analyzable
+# as pure Dart.
+analyzer:
+  exclude:
+    - lib/engine/**

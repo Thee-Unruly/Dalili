@@ -1,317 +1,290 @@
-/// Typed representation of all clinical data collected during one triage session.
+/// Neutral, pure-Dart container for the data collected about one patient.
 ///
-/// Every nullable field means **unknown** — the CHW has not yet provided or
-/// been asked for that data point.  A `null` is semantically distinct from
-/// `false` (sign absent) and is the trigger for [SafetyGate] to generate a
-/// follow-up question rather than letting [RulesEngine] operate on incomplete
-/// evidence.
+/// ## Null means unknown
+/// Every field is nullable. `null` means "not observed / not reported yet" and
+/// is **never** treated as `false`. The rules engine turns a `null` field into
+/// a follow-up question ([Outcome.needsMoreInfo]) instead of a negative
+/// finding. This is what keeps the core safe on incomplete input.
 ///
-/// Immutable: produce a new [SymptomSet] via [copyWith] as the CHW answers
-/// follow-up questions.
-library dalili.triage.symptom_set;
+/// ## No clinical content
+/// This file deliberately contains **no** clinical signs, thresholds, or
+/// classifications. It is a schema only. All clinical meaning lives in the
+/// caller-supplied rules JSON and follow-up-question map.
+library;
 
-// ─── Supporting enums ────────────────────────────────────────────────────────
-
-/// Result of the skin-pinch test for dehydration (IMCI §3).
-enum SkinPinchResult {
-  /// Skin returns to normal in < 1 second.
-  normal,
-
-  /// Skin returns to normal in 1–2 seconds (some dehydration).
-  slow,
-
-  /// Skin remains up for > 2 seconds (severe dehydration).
-  verySlow,
-}
-
-/// Severity of palmar pallor for anaemia screening (IMCI §7).
-enum PalmarPallor {
-  /// Palms normal colour.
-  none,
-
-  /// Palms pale but not very pale.
-  some,
-
-  /// Palms very pale or white.
-  severe,
-}
-
-// ─── SymptomSet ──────────────────────────────────────────────────────────────
-
-/// All clinical observations gathered for one child in one triage session.
+/// A snapshot of the fields the triage core knows how to reason about.
 ///
-/// Create via the default constructor, then narrow fields with [copyWith]
-/// as the conversation progresses.
+/// Immutable: build a new [SymptomSet] (with [copyWith]) as more answers
+/// arrive.
 class SymptomSet {
-  // ── Demographics ──────────────────────────────────────────────────────────
-  /// Age in whole months.  Must be 2–59 (2 months to < 5 years).
-  final int ageMonths;
+  /// Age of the patient in whole months.
+  final int? ageMonths;
 
-  /// Weight in kilograms (optional; used for dosing guidance).
-  final double? weightKg;
-
-  // ── General danger signs (IMCI Chart 1, p. 3) ────────────────────────────
-
-  /// Child is unable to drink or breastfeed.
-  final bool? unableToDrinkOrFeed;
-
-  /// Child vomits everything they take.
-  final bool? vomitsEverything;
-
-  /// Convulsions occurring now.
-  final bool? convulsionsNow;
-
-  /// History of convulsions in this illness episode.
-  final bool? convulsionsHistory;
-
-  /// Child is lethargic or unconscious.
-  final bool? lethargicOrUnconscious;
-
-  // ── Cough / Difficult breathing (IMCI Chart 2, p. 5–6) ──────────────────
-
-  /// Chief complaint includes cough or difficult breathing.
-  final bool? hasCough;
-
-  /// Respiratory rate counted over one full minute.
-  final int? breathsPerMinute;
-
-  /// Lower chest wall indrawing observed.
-  final bool? chestIndrawing;
-
-  /// Stridor heard in a calm child.
-  final bool? stridor;
-
-  /// Central cyanosis (blue lips/tongue).
-  final bool? centralCyanosis;
-
-  // ── Diarrhoea (IMCI Chart 3, p. 7–8) ────────────────────────────────────
-
-  /// Chief complaint includes diarrhoea.
-  final bool? hasDiarrhoea;
-
-  /// Duration of diarrhoea in days.
-  final int? diarrhoeaDays;
-
-  /// Blood in stool (dysentery).
-  final bool? bloodInStool;
-
-  /// Sunken eyes observed on examination.
-  final bool? sunkenEyes;
-
-  /// Skin-pinch test result (performed on abdomen).
-  final SkinPinchResult? skinPinch;
-
-  /// Child is restless or irritable.
-  final bool? restlessOrIrritable;
-
-  /// Child drinks eagerly / is very thirsty when offered water.
-  final bool? drinksEagerly;
-
-  // ── Fever (IMCI Chart 4, p. 9–11) ────────────────────────────────────────
-
-  /// Chief complaint includes fever, or axillary temp ≥ 37.5 °C.
-  final bool? hasFever;
-
-  /// Measured temperature in degrees Celsius (axillary).
-  final double? tempCelsius;
-
-  /// Duration of fever in days.
+  /// Number of days the patient has had fever.
   final int? feverDays;
 
-  /// Stiff neck on examination.
-  final bool? stiffNeck;
+  /// Whether the patient has cough or difficulty breathing.
+  final bool? coughOrDifficultyBreathing;
 
-  /// Bulging fontanelle (infants < 12 months only).
-  final bool? bulgingFontanelle;
+  /// Respiratory rate, in breaths per minute.
+  final int? breathsPerMinute;
 
-  /// Widespread rash (used for measles / severe febrile disease).
-  final bool? rash;
+  /// Whether the patient is unable to drink or breastfeed.
+  final bool? unableToDrinkOrBreastfeed;
 
-  /// Malaria rapid diagnostic test result.
-  /// `null` = test not yet done; `true` = positive; `false` = negative.
-  final bool? rdtPositive;
+  /// Whether the patient vomits everything.
+  final bool? vomitsEverything;
 
-  /// Any runny nose (helps identify source of fever).
-  final bool? runnyNose;
+  /// Whether the patient has convulsions.
+  final bool? convulsions;
 
-  // ── Ear problem (IMCI Chart 5, p. 12) ────────────────────────────────────
+  /// Whether the patient is lethargic or unconscious.
+  final bool? lethargicOrUnconscious;
 
-  /// Child complains of ear pain or parent reports ear discharge.
-  final bool? earProblem;
+  /// Whether chest indrawing is present.
+  final bool? chestIndrawing;
 
-  /// Pus observed draining from ear.
-  final bool? pusDrainingFromEar;
+  /// Whether stridor is present when the patient is calm.
+  final bool? stridorWhenCalm;
 
-  /// Duration of ear discharge in days.
-  final int? earDischargeDays;
+  /// Number of days the patient has had diarrhoea.
+  final int? diarrhoeaDays;
 
-  /// Tender swelling behind the ear (mastoiditis sign).
-  final bool? tenderSwellingBehindEar;
+  /// Whether there is blood in the stool.
+  final bool? bloodInStool;
 
-  // ── Malnutrition / Anaemia (IMCI Chart 6, p. 13) ─────────────────────────
-
-  /// Mid-upper arm circumference in millimetres.
-  final int? muacMm;
-
-  /// Visible severe wasting on inspection.
-  final bool? visibleSevereWasting;
-
-  /// Bilateral pitting oedema of both feet.
-  final bool? bilateralOedema;
-
-  /// Palmar pallor severity.
-  final PalmarPallor? palmarPallor;
-
-  // ─── Constructor ──────────────────────────────────────────────────────────
+  /// Extra, non-schema fields addressed by name.
+  ///
+  /// The twelve fields above are the fixed triage schema. This map lets callers
+  /// carry additional names — for example clearly-fake fixture fields such as
+  /// `sign_a` — without inventing clinical fields. [valueFor] checks the named
+  /// fields first, then this map. It is round-tripped by [toMap]/[fromMap].
+  final Map<String, Object?> additionalFields;
 
   const SymptomSet({
-    required this.ageMonths,
-    this.weightKg,
-    this.unableToDrinkOrFeed,
-    this.vomitsEverything,
-    this.convulsionsNow,
-    this.convulsionsHistory,
-    this.lethargicOrUnconscious,
-    this.hasCough,
+    this.ageMonths,
+    this.feverDays,
+    this.coughOrDifficultyBreathing,
     this.breathsPerMinute,
+    this.unableToDrinkOrBreastfeed,
+    this.vomitsEverything,
+    this.convulsions,
+    this.lethargicOrUnconscious,
     this.chestIndrawing,
-    this.stridor,
-    this.centralCyanosis,
-    this.hasDiarrhoea,
+    this.stridorWhenCalm,
     this.diarrhoeaDays,
     this.bloodInStool,
-    this.sunkenEyes,
-    this.skinPinch,
-    this.restlessOrIrritable,
-    this.drinksEagerly,
-    this.hasFever,
-    this.tempCelsius,
-    this.feverDays,
-    this.stiffNeck,
-    this.bulgingFontanelle,
-    this.rash,
-    this.rdtPositive,
-    this.runnyNose,
-    this.earProblem,
-    this.pusDrainingFromEar,
-    this.earDischargeDays,
-    this.tenderSwellingBehindEar,
-    this.muacMm,
-    this.visibleSevereWasting,
-    this.bilateralOedema,
-    this.palmarPallor,
-  }) : assert(ageMonths >= 2 && ageMonths <= 59,
-            'ageMonths must be 2–59 for IMCI under-5 protocol');
+    this.additionalFields = const <String, Object?>{},
+  });
 
-  // ─── Derived helpers ──────────────────────────────────────────────────────
+  /// Canonical, ordered list of every schema field name.
+  static const List<String> fieldNames = <String>[
+    'ageMonths',
+    'feverDays',
+    'coughOrDifficultyBreathing',
+    'breathsPerMinute',
+    'unableToDrinkOrBreastfeed',
+    'vomitsEverything',
+    'convulsions',
+    'lethargicOrUnconscious',
+    'chestIndrawing',
+    'stridorWhenCalm',
+    'diarrhoeaDays',
+    'bloodInStool',
+  ];
 
-  /// IMCI threshold for fast breathing depends on age bucket.
-  /// Returns `true` if [breathsPerMinute] meets the threshold for this child's age.
-  /// Returns `null` if [breathsPerMinute] has not been recorded.
-  bool? get hasFastBreathing {
-    if (breathsPerMinute == null) return null;
-    final threshold = ageMonths < 12 ? 50 : 40;
-    return breathsPerMinute! >= threshold;
+  /// Reads a field by its string [name].
+  ///
+  /// Schema fields are checked first, then [additionalFields]. Returns `null`
+  /// both when the field is unknown and when [name] is not carried at all; use
+  /// [hasField] / [isKnown] to tell those apart.
+  Object? valueFor(String name) => switch (name) {
+    'ageMonths' => ageMonths,
+    'feverDays' => feverDays,
+    'coughOrDifficultyBreathing' => coughOrDifficultyBreathing,
+    'breathsPerMinute' => breathsPerMinute,
+    'unableToDrinkOrBreastfeed' => unableToDrinkOrBreastfeed,
+    'vomitsEverything' => vomitsEverything,
+    'convulsions' => convulsions,
+    'lethargicOrUnconscious' => lethargicOrUnconscious,
+    'chestIndrawing' => chestIndrawing,
+    'stridorWhenCalm' => stridorWhenCalm,
+    'diarrhoeaDays' => diarrhoeaDays,
+    'bloodInStool' => bloodInStool,
+    _ => additionalFields[name],
+  };
+
+  /// Shorthand for [valueFor].
+  Object? operator [](String name) => valueFor(name);
+
+  /// Whether [name] is one of the twelve fixed schema fields.
+  static bool isSchemaField(String name) => fieldNames.contains(name);
+
+  /// Whether [name] is carried by this set (schema field or extra field),
+  /// regardless of whether its value is known.
+  bool hasField(String name) =>
+      isSchemaField(name) || additionalFields.containsKey(name);
+
+  /// Whether [name] is carried *and* its value is not `null`.
+  bool isKnown(String name) => hasField(name) && valueFor(name) != null;
+
+  /// Names of every field carried by this set whose value is still `null`.
+  List<String> get unknownFields {
+    final names = <String>{...fieldNames, ...additionalFields.keys};
+    return names
+        .where((name) => valueFor(name) == null)
+        .toList(growable: false);
   }
 
-  /// Fast-breathing threshold for display ("≥ 50 bpm" / "≥ 40 bpm").
-  int get fastBreathingThreshold => ageMonths < 12 ? 50 : 40;
-
-  /// Any general danger sign is present (true) or absent (false).
-  /// Returns `null` if any danger sign field is still unknown.
-  bool? get hasAnyGeneralDangerSign {
-    final signs = [
-      unableToDrinkOrFeed,
-      vomitsEverything,
-      convulsionsNow,
-      lethargicOrUnconscious,
-    ];
-    if (signs.any((s) => s == true)) return true;
-    if (signs.any((s) => s == null)) return null;
-    return false;
+  /// Serialises to a JSON-encodable map.
+  ///
+  /// Unknown (`null`) schema fields are omitted; [additionalFields] are merged
+  /// in (schema names win on collision).
+  Map<String, Object?> toMap() {
+    final map = <String, Object?>{};
+    for (final name in fieldNames) {
+      final value = valueFor(name);
+      if (value != null) map[name] = value;
+    }
+    additionalFields.forEach((key, value) {
+      map.putIfAbsent(key, () => value);
+    });
+    return map;
   }
 
-  // ─── copyWith ─────────────────────────────────────────────────────────────
-
-  SymptomSet copyWith({
-    int? ageMonths,
-    double? weightKg,
-    bool? unableToDrinkOrFeed,
-    bool? vomitsEverything,
-    bool? convulsionsNow,
-    bool? convulsionsHistory,
-    bool? lethargicOrUnconscious,
-    bool? hasCough,
-    int? breathsPerMinute,
-    bool? chestIndrawing,
-    bool? stridor,
-    bool? centralCyanosis,
-    bool? hasDiarrhoea,
-    int? diarrhoeaDays,
-    bool? bloodInStool,
-    bool? sunkenEyes,
-    SkinPinchResult? skinPinch,
-    bool? restlessOrIrritable,
-    bool? drinksEagerly,
-    bool? hasFever,
-    double? tempCelsius,
-    int? feverDays,
-    bool? stiffNeck,
-    bool? bulgingFontanelle,
-    bool? rash,
-    bool? rdtPositive,
-    bool? runnyNose,
-    bool? earProblem,
-    bool? pusDrainingFromEar,
-    int? earDischargeDays,
-    bool? tenderSwellingBehindEar,
-    int? muacMm,
-    bool? visibleSevereWasting,
-    bool? bilateralOedema,
-    PalmarPallor? palmarPallor,
-  }) {
+  /// Rebuilds a [SymptomSet] from a [toMap] result.
+  ///
+  /// Keys that are not schema fields are kept in [additionalFields]. Values are
+  /// coerced leniently (`int`/`num`/`String` for numbers, `bool`/`"true"`/
+  /// `"false"` for booleans); anything unparseable becomes `null` (unknown).
+  factory SymptomSet.fromMap(Map<String, Object?> map) {
+    final extras = <String, Object?>{};
+    map.forEach((key, value) {
+      if (!isSchemaField(key)) extras[key] = value;
+    });
     return SymptomSet(
-      ageMonths: ageMonths ?? this.ageMonths,
-      weightKg: weightKg ?? this.weightKg,
-      unableToDrinkOrFeed: unableToDrinkOrFeed ?? this.unableToDrinkOrFeed,
-      vomitsEverything: vomitsEverything ?? this.vomitsEverything,
-      convulsionsNow: convulsionsNow ?? this.convulsionsNow,
-      convulsionsHistory: convulsionsHistory ?? this.convulsionsHistory,
-      lethargicOrUnconscious: lethargicOrUnconscious ?? this.lethargicOrUnconscious,
-      hasCough: hasCough ?? this.hasCough,
-      breathsPerMinute: breathsPerMinute ?? this.breathsPerMinute,
-      chestIndrawing: chestIndrawing ?? this.chestIndrawing,
-      stridor: stridor ?? this.stridor,
-      centralCyanosis: centralCyanosis ?? this.centralCyanosis,
-      hasDiarrhoea: hasDiarrhoea ?? this.hasDiarrhoea,
-      diarrhoeaDays: diarrhoeaDays ?? this.diarrhoeaDays,
-      bloodInStool: bloodInStool ?? this.bloodInStool,
-      sunkenEyes: sunkenEyes ?? this.sunkenEyes,
-      skinPinch: skinPinch ?? this.skinPinch,
-      restlessOrIrritable: restlessOrIrritable ?? this.restlessOrIrritable,
-      drinksEagerly: drinksEagerly ?? this.drinksEagerly,
-      hasFever: hasFever ?? this.hasFever,
-      tempCelsius: tempCelsius ?? this.tempCelsius,
-      feverDays: feverDays ?? this.feverDays,
-      stiffNeck: stiffNeck ?? this.stiffNeck,
-      bulgingFontanelle: bulgingFontanelle ?? this.bulgingFontanelle,
-      rash: rash ?? this.rash,
-      rdtPositive: rdtPositive ?? this.rdtPositive,
-      runnyNose: runnyNose ?? this.runnyNose,
-      earProblem: earProblem ?? this.earProblem,
-      pusDrainingFromEar: pusDrainingFromEar ?? this.pusDrainingFromEar,
-      earDischargeDays: earDischargeDays ?? this.earDischargeDays,
-      tenderSwellingBehindEar: tenderSwellingBehindEar ?? this.tenderSwellingBehindEar,
-      muacMm: muacMm ?? this.muacMm,
-      visibleSevereWasting: visibleSevereWasting ?? this.visibleSevereWasting,
-      bilateralOedema: bilateralOedema ?? this.bilateralOedema,
-      palmarPallor: palmarPallor ?? this.palmarPallor,
+      ageMonths: _asInt(map['ageMonths']),
+      feverDays: _asInt(map['feverDays']),
+      coughOrDifficultyBreathing: _asBool(map['coughOrDifficultyBreathing']),
+      breathsPerMinute: _asInt(map['breathsPerMinute']),
+      unableToDrinkOrBreastfeed: _asBool(map['unableToDrinkOrBreastfeed']),
+      vomitsEverything: _asBool(map['vomitsEverything']),
+      convulsions: _asBool(map['convulsions']),
+      lethargicOrUnconscious: _asBool(map['lethargicOrUnconscious']),
+      chestIndrawing: _asBool(map['chestIndrawing']),
+      stridorWhenCalm: _asBool(map['stridorWhenCalm']),
+      diarrhoeaDays: _asInt(map['diarrhoeaDays']),
+      bloodInStool: _asBool(map['bloodInStool']),
+      additionalFields: extras,
     );
   }
 
+  /// Returns a copy with the supplied fields overwritten.
+  ///
+  /// Passing `null` leaves a field untouched; this helper cannot reset a field
+  /// back to unknown. Use [toMap] minus a key and [SymptomSet.fromMap] to do
+  /// that.
+  SymptomSet copyWith({
+    int? ageMonths,
+    int? feverDays,
+    bool? coughOrDifficultyBreathing,
+    int? breathsPerMinute,
+    bool? unableToDrinkOrBreastfeed,
+    bool? vomitsEverything,
+    bool? convulsions,
+    bool? lethargicOrUnconscious,
+    bool? chestIndrawing,
+    bool? stridorWhenCalm,
+    int? diarrhoeaDays,
+    bool? bloodInStool,
+    Map<String, Object?>? additionalFields,
+  }) {
+    return SymptomSet(
+      ageMonths: ageMonths ?? this.ageMonths,
+      feverDays: feverDays ?? this.feverDays,
+      coughOrDifficultyBreathing:
+          coughOrDifficultyBreathing ?? this.coughOrDifficultyBreathing,
+      breathsPerMinute: breathsPerMinute ?? this.breathsPerMinute,
+      unableToDrinkOrBreastfeed:
+          unableToDrinkOrBreastfeed ?? this.unableToDrinkOrBreastfeed,
+      vomitsEverything: vomitsEverything ?? this.vomitsEverything,
+      convulsions: convulsions ?? this.convulsions,
+      lethargicOrUnconscious:
+          lethargicOrUnconscious ?? this.lethargicOrUnconscious,
+      chestIndrawing: chestIndrawing ?? this.chestIndrawing,
+      stridorWhenCalm: stridorWhenCalm ?? this.stridorWhenCalm,
+      diarrhoeaDays: diarrhoeaDays ?? this.diarrhoeaDays,
+      bloodInStool: bloodInStool ?? this.bloodInStool,
+      additionalFields: additionalFields ?? this.additionalFields,
+    );
+  }
+
+  // ─── Coercion helpers ───────────────────────────────────────────────────
+
+  static int? _asInt(Object? value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static bool? _asBool(Object? value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is String) {
+      final normalised = value.toLowerCase();
+      if (normalised == 'true') return true;
+      if (normalised == 'false') return false;
+    }
+    return null;
+  }
+
+  static bool _mapEquals(Map<String, Object?> a, Map<String, Object?> b) {
+    if (a.length != b.length) return false;
+    for (final entry in a.entries) {
+      if (!b.containsKey(entry.key) || b[entry.key] != entry.value)
+        return false;
+    }
+    return true;
+  }
+
   @override
-  String toString() => 'SymptomSet(age=${ageMonths}m, '
-      'gds=${hasAnyGeneralDangerSign}, '
-      'bpm=$breathsPerMinute, fever=$hasFever, '
-      'diarrhoea=$hasDiarrhoea, muac=$muacMm)';
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SymptomSet &&
+        other.ageMonths == ageMonths &&
+        other.feverDays == feverDays &&
+        other.coughOrDifficultyBreathing == coughOrDifficultyBreathing &&
+        other.breathsPerMinute == breathsPerMinute &&
+        other.unableToDrinkOrBreastfeed == unableToDrinkOrBreastfeed &&
+        other.vomitsEverything == vomitsEverything &&
+        other.convulsions == convulsions &&
+        other.lethargicOrUnconscious == lethargicOrUnconscious &&
+        other.chestIndrawing == chestIndrawing &&
+        other.stridorWhenCalm == stridorWhenCalm &&
+        other.diarrhoeaDays == diarrhoeaDays &&
+        other.bloodInStool == bloodInStool &&
+        _mapEquals(other.additionalFields, additionalFields);
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    ageMonths,
+    feverDays,
+    coughOrDifficultyBreathing,
+    breathsPerMinute,
+    unableToDrinkOrBreastfeed,
+    vomitsEverything,
+    convulsions,
+    lethargicOrUnconscious,
+    chestIndrawing,
+    stridorWhenCalm,
+    diarrhoeaDays,
+    bloodInStool,
+    additionalFields.length,
+  );
+
+  @override
+  String toString() => 'SymptomSet(${toMap()})';
 }
